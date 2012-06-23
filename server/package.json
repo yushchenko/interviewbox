@@ -5,9 +5,9 @@
   "description": "a simple application for interviewing web developers online",
 
   "dependencies" : {
+      "express" : "*",
       "socket.io"   :  "*",
       "opentok" : "0.2.x"
-
   },
 
   "engine": {

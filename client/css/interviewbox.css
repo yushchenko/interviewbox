@@ -1,4 +1,29 @@
-#test {
-    width: 200px;
+
+/* Chat */
+
+#chatContainer {
+    width: 100%;
     height: 200px;
+    margin-top: 10px;
+}
+
+
+/* Editor */
+
+#editorContainer {
+    margin-top: 10px;
+    border: 1px solid #ccc;
+}
+
+#buttonContainer {
+    margin-top: 10px;
+}
+
+.right { float: right; }
+
+#testFrame {
+    width: 100%;
+    height: 200px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
 }

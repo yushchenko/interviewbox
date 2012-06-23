@@ -1,11 +1,11 @@
 (function (window) {
 
-    var chatContainer,
-        session;
+    var host = 'localhost',
+        port = '8081';
 
     function getJoinRequestFromHash() {
 
-        var re = /#(\w+)\/(\w+)\/(\w+)/,
+        var re = /#(\w+)\/(\w+)/,
             result = re.exec(window.location.hash);
 
         if (!result) {
@@ -14,37 +14,41 @@
 
         return {
             interviewId: result[1],
-            newParticipant: { role: result[2], name: result[3] }
+            participantId: result[2]
         };
     }
 
-
-    function subscribeToStreams(streams) {
-
-        var element, id, s, i;
-
-        for (i = 0; i < streams.length; i += 1) {
-
-            s = streams[i];
-
-            if (s.connection.connectionId === session.connection.connectionId) {
-                continue;
-            }
-
-            element = document.createElement('div');
-            id = 's_' + s.streamId;
-            element.setAttribute('id', id);
-            chatContainer.appendChild(element);
-
-            session.subscribe(s, id);
-        }
-    }
+    // Chat --------------------------------------------------------------------
 
     function initChat(interview, token) {
 
-        var i;
+        TB.setLogLevel(TB.DEBUG);
 
-        session = TB.initSession(interview.sessionId);
+        var session = TB.initSession(interview.sessionId),
+            chatContainer = document.getElementById('chatContainer'),
+            i;
+
+        function subscribeToStreams(streams) {
+
+            var element, id, s, i;
+
+            for (i = 0; i < streams.length; i += 1) {
+
+                s = streams[i];
+
+                if (s.connection.connectionId === session.connection.connectionId) {
+                    continue;
+                }
+
+                element = document.createElement('div');
+                id = 's_' + s.streamId;
+                element.setAttribute('id', id);
+                chatContainer.appendChild(element);
+
+                session.subscribe(s, id);
+            }
+        }
+
         session.addEventListener('sessionConnected', function (e) {
             
             var element, publisher;
@@ -62,34 +66,89 @@
         session.connect(interview.apiKey, token);
     }
 
+    // Editor ------------------------------------------------------------------
+
+    function initEditor(config) {
+
+        var editor = CodeMirror(
+                document.getElementById('editor'),
+                { mode: 'text/html', tabMode: 'indent' }
+            );
+
+        var iframe = document.getElementById('testFrame'),
+            checkButton = document.getElementById('checkButton'),
+            shareButton = document.getElementById('shareButton');
+
+        function updateEditor(source) {
+            editor.setValue(source || config.source);
+        }
+
+        function updatePreview() {
+            iframe.src = 'http://' + host + ':' + port + '/draft/' +
+                         config.interviewId + '/' + config.participantId;
+        }
+
+        function checkDraft() {
+            config.onCheckDraft(editor.getValue());
+        }
+
+        function shareSource() {
+            config.onShareSource(editor.getValue());
+        }
+
+        checkButton.addEventListener('click', checkDraft);
+        shareButton.addEventListener('click', shareSource);
+
+        updateEditor();
+        updatePreview();
+
+        return {
+            updateEditor: updateEditor,
+            updatePreview: updatePreview
+        };
+    }
+
+    // Initialization ----------------------------------------------------------
+
     function start() {
 
-        var joinRequest = getJoinRequestFromHash();
+        var joinRequest = getJoinRequestFromHash(),
+            chat, editor;
 
         if (!joinRequest) {
             alert('To join to an interview type URL in the following format: \n\ninterviewbox.yushchenko.name/#[interviewId]/[candidate|interviewer]/[you name]');
             return;
         }
-        chatContainer = document.getElementById('chatContainer');
 
         var socket = io.connect('http://localhost:8081/');
-
-        TB.setLogLevel(TB.DEBUG);
 
         socket.on('connect', function() {
             socket.emit('join', joinRequest);
         });
 
         socket.on('hello', function(data) {
+
             initChat(data.interview, data.token);
+
+            editor = initEditor({
+                source: data.interview.source,
+                interviewId: joinRequest.interviewId,
+                participantId: joinRequest.participantId,
+
+                onCheckDraft: function(draft) {
+                    socket.emit('updatedraft', draft, function() {
+                        editor.updatePreview();
+                    });
+                },
+
+                onShareSource: function(source) {
+                    socket.emit('updatesource', source);
+                }
+            });
         });
 
-        socket.on('join', function(participant) { 
-
-        });
-
-        socket.on('leave', function(participant) {
-
+        socket.on('updatesource', function(source) {
+            editor.updateEditor(source);
         });
     }
 

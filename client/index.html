@@ -4,11 +4,19 @@
     <title>InterviewBox</title>
     <meta name="description" content="A simple application for interviewing web developers online." />
 
-    <link href="css/libs/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css" />
+    <link href="libs/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css" />
+    <link href="libs/codemirror/lib/codemirror.css" rel="stylesheet" type="text/css" />
+
     <link href="css/interviewbox.css" rel="stylesheet" type="text/css" />
 
     <script src="http://localhost:8081/socket.io/socket.io.js"></script>
     <script src="http://staging.tokbox.com/v0.91/js/TB.min.js"></script>
+
+    <script src="libs/codemirror/lib/codemirror.js"></script>
+    <script src="libs/codemirror/mode/xml/xml.js"></script>
+    <script src="libs/codemirror/mode/javascript/javascript.js"></script>
+    <script src="libs/codemirror/mode/css/css.js"></script>
+    <script src="libs/codemirror/mode/htmlmixed/htmlmixed.js"></script>
 
     <script src="js/interviewbox.js"></script>
 
@@ -23,10 +31,18 @@
         <div id="publisher"></div>
       </div>
 
+      <div id="editorContainer">
+        <div id="editor"></div>
+      </div>
+
+      <div id="buttonContainer">
+        <button id="checkButton" class="btn">Check Code</button>
+        <button id="shareButton" class="btn btn-success right">Share Code</button>
+      </div>
+
+      <iframe id="testFrame"></iframe>
+
     </div>
-
-
-
 
   </body>
 
