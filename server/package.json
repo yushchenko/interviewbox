@@ -1,0 +1,14 @@
+{
+  "name": "http-server",
+  "version": "0.0.1",
+  "author": "Valery Yushchenko",
+  "description": "a simple application for interviewing web developers online",
+
+  "dependencies" : {
+    "socket.io"   :  "*"
+  },
+
+  "engine": {
+    "node": ">=0.6"
+  }
+}
