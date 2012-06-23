@@ -5,10 +5,12 @@
   "description": "a simple application for interviewing web developers online",
 
   "dependencies" : {
-    "socket.io"   :  "*"
+      "socket.io"   :  "*",
+      "opentok" : "0.2.x"
+
   },
 
   "engine": {
-    "node": ">=0.6"
+      "node": ">=0.6"
   }
 }

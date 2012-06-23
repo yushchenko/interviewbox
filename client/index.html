@@ -6,16 +6,27 @@
 
     <link href="css/libs/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css" />
     <link href="css/interviewbox.css" rel="stylesheet" type="text/css" />
+
+    <script src="http://localhost:8081/socket.io/socket.io.js"></script>
+    <script src="http://staging.tokbox.com/v0.91/js/TB.min.js"></script>
+
+    <script src="js/interviewbox.js"></script>
+
   </head>
 
   <body>
 
     <div class="container">
       <h1>InterviewBox</h1>
+
+      <div id="chatContainer">
+        <div id="publisher"></div>
+      </div>
+
     </div>
 
-    <script src="http://localhost:8081/socket.io/socket.io.js"></script>
-    <script src="js/interviewbox.js"></script>
+
+
 
   </body>
 

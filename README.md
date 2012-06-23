@@ -4,6 +4,16 @@ TokBox coding exercise.
 
 Progress tracking in docs/log.md.
 
+OpenTok API:
+
+API key: 16265011
+API secret: 1aab123ae8944978f4b193377827d4c1bc93c1eb
+
+## Notes
+
+http://www.tokbox.com/opentok/api/documentation/gettingstarted
+need to be updated - TB.initPublisher() takes id as the second param
+
 ## The Task
 
 > Hi Valery,
