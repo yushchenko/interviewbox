@@ -1,35 +1,19 @@
 (function (window) {
 
-    var host = 'interviewbox.yushchenko.name',
-        //host = 'localhost',
-        port = '8081';
+    var HOST = 'interviewbox.yushchenko.name',
+        //HOST = 'localhost',
+        PORT = '8081',
+        DEBUG = true;
 
-    function getJoinRequestFromHash() {
+    // Chat Module -------------------------------------------------------------
+    // provides simple chat using OpenTok API
 
-        var re = /#(\w+)\/(\w+)/,
-            result = re.exec(window.location.hash);
+    function initChat(config) {
 
-        if (!result) {
-            return null;
-        }
+        DEBUG && TB.setLogLevel(TB.DEBUG);
 
-        return {
-            interviewId: result[1],
-            participantId: result[2]
-        };
-    }
-
-    // Chat --------------------------------------------------------------------
-
-    function initChat(interview, token) {
-
-        TB.setLogLevel(TB.DEBUG);
-        
-
-        var session = TB.initSession(interview.sessionId),
-            chatContainer = document.getElementById('chatContainer'),
-            i,
-            videoParams = { height: 150, width: 200 };
+        var session = TB.initSession(config.interview.sessionId),
+            chatContainer = document.getElementById('chatContainer');
 
         function subscribeToStreams(streams) {
 
@@ -48,7 +32,7 @@
                 element.setAttribute('id', id);
                 chatContainer.appendChild(element);
 
-                session.subscribe(s, id, videoParams);
+                session.subscribe(s, id, { height: 150, width: 200 });
             }
         }
 
@@ -56,7 +40,8 @@
             
             var element, publisher;
 
-            publisher = TB.initPublisher(interview.apiKey, 'publisher', videoParams);
+            publisher = TB.initPublisher(config.interview.apiKey, 'publisher',
+                { height: 150, width: 200, name: config.name });
             session.publish(publisher);
 
             subscribeToStreams(e.streams);
@@ -66,10 +51,11 @@
             subscribeToStreams(e.streams);
         });
 
-        session.connect(interview.apiKey, token);
+        session.connect(config.interview.apiKey, config.token);
     }
 
-    // Editor ------------------------------------------------------------------
+    // Editor Module -----------------------------------------------------------
+    // provides code editor, preview and related buttons
 
     function initEditor(config) {
 
@@ -104,7 +90,7 @@
         }
 
         function updatePreview() {
-            iframe.src = 'http://' + host + ':' + port + '/draft/' +
+            iframe.src = 'http://' + HOST + ':' + PORT + '/draft/' +
                          config.interviewId + '/' + config.participantId;
         }
 
@@ -132,74 +118,138 @@
         };
     }
 
-    // Initialization ----------------------------------------------------------
+    // Server Module -----------------------------------------------------------
+    // provides communication layer with server via Socket.io
+
+    function initServer(config) {
+
+        var socket = io.connect('http://' + HOST + ':' + PORT + '/'),
+            isInitialized = false;
+
+        socket.on('connect', function() {
+
+            if (isInitialized) { // preventing double initialization on reconnect
+                alert('Server just restarted. Reloading the page...');
+                window.location.reload();
+                return;
+            } 
+
+            socket.emit('join', config.joinRequest);
+            isInitialized = true;
+        });
+
+        socket.on('hello', function(data) {
+            config.onReady(data);
+        });
+
+        socket.on('startediting', function() {
+            config.onStartEditing();
+        });
+
+        socket.on('updatesource', function(source) {
+            config.onUpdateSource(source);
+        });
+
+        return {
+
+            updateDraft: function(draft, fn) {
+                socket.emit('updatedraft', draft, fn);
+            },
+
+            updateSource: function(source) {
+                socket.emit('updatesource', source);
+            },
+
+            startEditing: function() {
+                socket.emit('startediting');
+            }
+        };
+    }
+
+    // Utils -------------------------------------------------------
+
+    function getJoinRequestFromHash() {
+
+        var re = /#(\w+)\/(\w+)/,
+            result = re.exec(window.location.hash);
+
+        if (!result) return null;
+
+        return {
+            interviewId: result[1],
+            participantId: result[2]
+        };
+    }
 
     function setDisplay(id, value) { document.getElementById(id).style.display = value; }
+
     function hideLoadingMessage() { setDisplay('loadingMessage', 'none'); }
+
     function showError() {
         hideLoadingMessage();
         setDisplay('errorMessage', 'block');
     }
+
     function showContent() {
         hideLoadingMessage();
         setDisplay('content', 'block');
     }
 
-    function start() {
+    // Startup -----------------------------------------------------------------
+    // entry point - binding all modules and functions together
+
+    window.onload = function start() {
 
         var joinRequest = getJoinRequestFromHash(),
-            chat, editor;
+            server, chat, editor;
 
         if (!joinRequest) {
             showError();
             return;
         }
 
-        var socket = io.connect('http://' + host + ':' + port + '/');
+        server = initServer({
 
-        socket.on('connect', function() {
-            socket.emit('join', joinRequest);
+            joinRequest: joinRequest,
+
+            onReady: function(data) {
+
+                showContent();
+    
+                chat = initChat({
+                    interview: data.interview,
+                    token: data.token,
+                    name: joinRequest.participantId
+                });
+    
+                editor = initEditor({
+                    source: data.interview.source,
+                    interviewId: joinRequest.interviewId,
+                    participantId: joinRequest.participantId,
+    
+                    onCheckDraft: function(draft) {
+                        server.updateDraft(draft, function() { editor.updatePreview(); });
+                    },
+    
+                    onShareSource: function(source) {
+                        server.updateSource(source);
+                    },
+    
+                    onStartEditing: function() {
+                        server.startEditing();
+                    }
+                });
+            },
+
+            onStartEditing: function() {
+                editor.setEditing(true);
+            },
+
+            onUpdateSource: function(source) {
+                editor.updateEditor(source);
+                editor.setEditing(false);
+            }
         });
-
-        socket.on('hello', function(data) {
-
-            showContent();
-
-            initChat(data.interview, data.token);
-
-            editor = initEditor({
-                source: data.interview.source,
-                interviewId: joinRequest.interviewId,
-                participantId: joinRequest.participantId,
-
-                onCheckDraft: function(draft) {
-                    socket.emit('updatedraft', draft, function() {
-                        editor.updatePreview();
-                    });
-                },
-
-                onShareSource: function(source) {
-                    socket.emit('updatesource', source);
-                },
-
-                onStartEditing: function() {
-                    socket.emit('startediting');
-                }
-            });
-
-        });
-
-        socket.on('updatesource', function(source) {
-            editor.updateEditor(source);
-            editor.setEditing(false);
-        });
-
-        socket.on('startediting', function() {
-            console.log('startediting');
-            editor.setEditing(true);
-        });
-    }
-
-    window.onload = start;
+    };
 
 })(window);
