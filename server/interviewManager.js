@@ -39,7 +39,7 @@ exports.joinInterview = function (interviewId, participantId, callback) {
 
     // Creating new interview and TB session
 
-    var source = getDefaultSource();
+    var source = fs.readFileSync('default.html', 'utf-8');
     interview = {
         interviewId: interviewId,
         apiKey: OPENTOK_API_KEY,

@@ -5,6 +5,7 @@ var
 
 var app = require('express').createServer(),
     io = require('socket.io').listen(app),
+    fs = require('fs'),
     interviewManager = require('./interviewManager.js');
 
 io.sockets.on('connection', function (socket) {
@@ -50,8 +51,8 @@ app.get('/draft/:interviewId/:participantId', function (req, res) {
 
     var interview = interviewManager.getInterview(req.params.interviewId);
 
-    if (!interview) {
-        res.send('ERROR: interview not found, interviewId=' + interviewId);
+    if (!interview || !interview.drafts[req.params.participantId]) {
+        res.send(fs.readFileSync('default.html', 'utf-8'));
         return;
     }
 
