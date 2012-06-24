@@ -1,6 +1,7 @@
 (function (window) {
 
-    var host = 'interviewbox.yushchenko.name',
+    var //host = 'interviewbox.yushchenko.name',
+        host = 'localhost',
         port = '8081';
 
     function getJoinRequestFromHash() {
@@ -23,10 +24,12 @@
     function initChat(interview, token) {
 
         TB.setLogLevel(TB.DEBUG);
+        
 
         var session = TB.initSession(interview.sessionId),
             chatContainer = document.getElementById('chatContainer'),
-            i;
+            i,
+            videoParams = { height: 150, width: 200 };
 
         function subscribeToStreams(streams) {
 
@@ -45,7 +48,7 @@
                 element.setAttribute('id', id);
                 chatContainer.appendChild(element);
 
-                session.subscribe(s, id);
+                session.subscribe(s, id, videoParams);
             }
         }
 
@@ -53,7 +56,7 @@
             
             var element, publisher;
 
-            publisher = TB.initPublisher(interview.apiKey, 'publisher');
+            publisher = TB.initPublisher(interview.apiKey, 'publisher', videoParams);
             session.publish(publisher);
 
             subscribeToStreams(e.streams);

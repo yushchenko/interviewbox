@@ -1,4 +1,5 @@
-var host = 'interviewbox.yushchenko.name',
+var //host = 'interviewbox.yushchenko.name',
+    host = 'localhost',
     port = 8081;
 
 var OPENTOK_API_KEY = '16265011',
