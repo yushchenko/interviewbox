@@ -1,6 +1,6 @@
 (function (window) {
 
-    var host = 'localhost',
+    var host = 'interviewbox.yushchenko.name',
         port = '8081';
 
     function getJoinRequestFromHash() {
@@ -120,7 +120,7 @@
             return;
         }
 
-        var socket = io.connect('http://localhost:8081/');
+        var socket = io.connect('http://' + host + ':' + port + '/');
 
         socket.on('connect', function() {
             socket.emit('join', joinRequest);
