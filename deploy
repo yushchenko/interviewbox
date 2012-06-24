@@ -1,3 +1,4 @@
 #!/bin/bash
 
-rsync -avz --exclude .git . user@interviewbox.yushchenko.name:/home/user/interviewbox
+rsync -avz --exclude .git . user@interviewbox.yushchenko.name:/home/user/interviewbox &&
+ssh user@interviewbox.yushchenko.name 'sudo initctl restart interviewbox'

@@ -9,8 +9,48 @@
 
     <link href="css/interviewbox.css" rel="stylesheet" type="text/css" />
 
-    <!-- <script src="http://interviewbox.yushchenko.name:8081/socket.io/socket.io.js"></script> -->
-    <script src="http://localhost:8081/socket.io/socket.io.js"></script>
+  </head>
+
+  <body>
+
+    <div class="container">
+      <h1>InterviewBox</h1>
+      <!-- <p>Interviewing of web developers have never been so easy.</p> -->
+
+      <div id="loadingMessage">Loading...</div>
+
+      <div id="errorMessage" style="display:none;">
+         <h3>Error</h3>
+         <p>To join to an interview type the URL in the following format: <b>http://interviewbox.yushchenko.name/#[interviewId]/[youName]</b></p>
+      </div>
+
+      <div id="content" style="display:none;">
+
+        <div id="chatContainer">
+          <div id="publisher" class="chat">Connecting to video chat...</div>
+        </div>
+
+        <div id="editorContainer">
+          <div id="editor"></div>
+        </div>
+
+        <div id="buttonContainer">
+          <button id="checkButton" class="btn"
+                  title="Press this button to execute your code and see preview in area below."
+                  >Check Code</button>
+          <button id="shareButton" class="btn btn-success right"
+                  title="Press this button to share your changes with all other participants"
+                  >Share Code</button>
+          <p id="editingMessage" class="right" style="display:none;">Code is edited by another participant.</p>
+        </div>
+
+        <iframe id="testFrame"></iframe>
+      </div>
+
+    </div>
+
+    <script src="http://interviewbox.yushchenko.name:8081/socket.io/socket.io.js"></script>
+    <!-- <script src="http://localhost:8081/socket.io/socket.io.js"></script> -->
     <script src="http://staging.tokbox.com/v0.91/js/TB.min.js"></script>
 
     <script src="libs/codemirror/lib/codemirror.js"></script>
@@ -20,30 +60,6 @@
     <script src="libs/codemirror/mode/htmlmixed/htmlmixed.js"></script>
 
     <script src="js/interviewbox.js"></script>
-
-  </head>
-
-  <body>
-
-    <div class="container">
-      <h1>InterviewBox</h1>
-
-      <div id="chatContainer">
-        <div id="publisher" class="chat">Loading video chat...</div>
-      </div>
-
-      <div id="editorContainer">
-        <div id="editor"></div>
-      </div>
-
-      <div id="buttonContainer">
-        <button id="checkButton" class="btn">Check Code</button>
-        <button id="shareButton" class="btn btn-success right">Share Code</button>
-      </div>
-
-      <iframe id="testFrame"></iframe>
-
-    </div>
 
   </body>
 

@@ -1,3 +1,19 @@
+/* General */
+
+h1 {
+    margin-top: 10px;
+}
+
+#errorMessage {
+    margin-top: 50px;
+    border-left: 5px solid red;
+    padding-left: 10px;
+}
+
+#loadingMessage {
+    margin-top: 20px;
+}
+
 /* Chat */
 
 #chatContainer {
@@ -12,6 +28,7 @@
     padding: 5px;
     border: 1px solid #ccc;
 }
+
 /* Editor */
 
 #editorContainer {

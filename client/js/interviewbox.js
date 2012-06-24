@@ -1,7 +1,7 @@
 (function (window) {
 
-    var //host = 'interviewbox.yushchenko.name',
-        host = 'localhost',
+    var host = 'interviewbox.yushchenko.name',
+        //host = 'localhost',
         port = '8081';
 
     function getJoinRequestFromHash() {
@@ -73,17 +73,34 @@
 
     function initEditor(config) {
 
+        var isEditing = false, isUpdate = false;
+
         var editor = CodeMirror(
                 document.getElementById('editor'),
-                { mode: 'text/html', tabMode: 'indent' }
+                {
+                    mode: 'text/html',
+                    tabMode: 'indent',
+                    onChange: function() {
+
+                        if (isEditing || isUpdate) return;
+
+                        config.onStartEditing();
+                        isEditing = true;
+                    }
+                }
             );
 
         var iframe = document.getElementById('testFrame'),
             checkButton = document.getElementById('checkButton'),
-            shareButton = document.getElementById('shareButton');
+            shareButton = document.getElementById('shareButton'),
+            editingMessage = document.getElementById('editingMessage');
+
 
         function updateEditor(source) {
+            isUpdate = true;
             editor.setValue(source || config.source);
+            isUpdate = false;
+            isEditing = false;
         }
 
         function updatePreview() {
@@ -91,27 +108,42 @@
                          config.interviewId + '/' + config.participantId;
         }
 
-        function checkDraft() {
+        function setEditing(editing) {
+            shareButton.style.display = editing ? 'none' : 'block';
+            editingMessage.style.display = editing ? 'block' : 'none';
+        }
+
+        checkButton.addEventListener('click', function() {
             config.onCheckDraft(editor.getValue());
-        }
+        });
 
-        function shareSource() {
+        shareButton.addEventListener('click', function() {
             config.onShareSource(editor.getValue());
-        }
-
-        checkButton.addEventListener('click', checkDraft);
-        shareButton.addEventListener('click', shareSource);
+            isEditing = false;
+        });
 
         updateEditor();
         updatePreview();
 
         return {
             updateEditor: updateEditor,
-            updatePreview: updatePreview
+            updatePreview: updatePreview,
+            setEditing: setEditing
         };
     }
 
     // Initialization ----------------------------------------------------------
+
+    function setDisplay(id, value) { document.getElementById(id).style.display = value; }
+    function hideLoadingMessage() { setDisplay('loadingMessage', 'none'); }
+    function showError() {
+        hideLoadingMessage();
+        setDisplay('errorMessage', 'block');
+    }
+    function showContent() {
+        hideLoadingMessage();
+        setDisplay('content', 'block');
+    }
 
     function start() {
 
@@ -119,7 +151,7 @@
             chat, editor;
 
         if (!joinRequest) {
-            alert('To join to an interview type URL in the following format: \n\ninterviewbox.yushchenko.name/#[interviewId]/[candidate|interviewer]/[you name]');
+            showError();
             return;
         }
 
@@ -130,6 +162,8 @@
         });
 
         socket.on('hello', function(data) {
+
+            showContent();
 
             initChat(data.interview, data.token);
 
@@ -146,12 +180,23 @@
 
                 onShareSource: function(source) {
                     socket.emit('updatesource', source);
+                },
+
+                onStartEditing: function() {
+                    socket.emit('startediting');
                 }
             });
+
         });
 
         socket.on('updatesource', function(source) {
             editor.updateEditor(source);
+            editor.setEditing(false);
+        });
+
+        socket.on('startediting', function() {
+            console.log('startediting');
+            editor.setEditing(true);
         });
     }
 

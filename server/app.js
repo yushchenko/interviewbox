@@ -1,5 +1,5 @@
-var //host = 'interviewbox.yushchenko.name',
-    host = 'localhost',
+var host = 'interviewbox.yushchenko.name',
+    //host = 'localhost',
     port = 8081;
 
 var OPENTOK_API_KEY = '16265011',
@@ -80,6 +80,8 @@ io.sockets.on('connection', function (socket) {
         interviewId = joinRequest.interviewId;
         participantId = joinRequest.participantId;
 
+        socket.join(interviewId);
+
         if (!socketsByInterview[interviewId]) {
             socketsByInterview[interviewId] = [];
         }
@@ -91,11 +93,24 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('updatedraft', function(draft, fn) {
+
+        if (interviewId === undefined) return;
+
         getInterview(interviewId).drafts[participantId] = draft;
         fn();
     });
 
+    function broadcast(msg, data) {
+        if (interviewId === undefined) return;
+
+        socket.leave(interviewId); // to avoid sending message to yourself
+        io.sockets.in(interviewId).emit(msg, data);
+        socket.join(interviewId);
+    }
+
     socket.on('updatesource', function(source) {
+
+        if (interviewId === undefined) return;
 
         var interview = getInterview(interviewId);
 
@@ -108,5 +123,10 @@ io.sockets.on('connection', function (socket) {
             }
             sockets[i].emit('updatesource', source);
         }
+    });
+
+    socket.on('startediting', function() {
+        if (interviewId === undefined) return;
+        broadcast('startediting');
     });
 });
