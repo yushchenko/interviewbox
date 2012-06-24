@@ -73,4 +73,20 @@ What we have at the end of the day?
    * Source code in GitHub repository
    * The working application deployed to interviewbox.yushchenko.name
 
-TIME SPENT ~2h
+TIME SPENT ~2 hours
+
+
+# Day 1 - Sat 23 June 2012
+
+Implemented the most of functionality. Set up server and deployed (Ninefold).
+
+OpenTok API was down half of the time.
+
+TIME SPENT 6-8 hours.
+
+# Day 2 - Sun 24 June 2012
+
+Implemented a couple of minor features. Polished UI.
+Refactored code.
+
+TIME SPENT ~5 hours
