@@ -1,6 +1,6 @@
 {
-  "name": "http-server",
-  "version": "0.0.1",
+  "name": "interviewbox-server",
+  "version": "0.1.0",
   "author": "Valery Yushchenko",
   "description": "a simple application for interviewing web developers online",
 
